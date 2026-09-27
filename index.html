@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistem PULSE — Bank Jateng</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+
+    --paper:#ECE9E1;
+    --panel:#FFFFFF;
+    --ink:#16233D;
+    --ink-soft:#5B6478;
+    --ink-faint:#8890A0;
+    --navy:#0F2244;
+    --navy-2:#17325C;
+    --red:#A81F2D;
+    --red-soft:#F5E2E0;
+    --green:#1F7A54;
+    --green-soft:#DEEEE5;
+    --amber:#96690D;
+    --amber-soft:#F2E7CE;
+    --hair:#D9D4C6;
+    --hair-panel:#E7E3D9;
+    --shadow:0 1px 2px rgba(15,34,68,0.06);
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme:dark){
+      --paper:#111621;
+      --panel:#181E2C;
+      --ink:#E7E5DE;
+      --ink-soft:#A6ADBB;
+      --ink-faint:#727A8A;
+      --navy:#0B1830;
+      --navy-2:#16274A;
+      --red:#D6564C;
+      --red-soft:#3A2020;
+      --green:#3FAE83;
+      --green-soft:#193227;
+      --amber:#D6A94C;
+      --amber-soft:#332A14;
+      --hair:#2A3040;
+      --hair-panel:#252B3A;
+      --shadow:0 1px 2px rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#111621; --panel:#181E2C; --ink:#E7E5DE; --ink-soft:#A6ADBB; --ink-faint:#727A8A;
+    --navy:#0B1830; --navy-2:#16274A; --red:#D6564C; --red-soft:#3A2020; --green:#3FAE83;
+    --green-soft:#193227; --amber:#D6A94C; --amber-soft:#332A14; --hair:#2A3040; --hair-panel:#252B3A;
+    --shadow:0 1px 2px rgba(0,0,0,0.4);
+  }
+  html,body{height:100%;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    font-family:'Inter',-apple-system,'Segoe UI',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    margin:0;
+  }
+  .num{font-family:'Fraunces','Iowan Old Style',Georgia,serif; font-variant-numeric: tabular-nums; letter-spacing:-0.01em;}
+  .hidden{display:none !important;}
+
+  /* ---- Masthead ---- */
+  .masthead{
+    background:linear-gradient(180deg,var(--navy),var(--navy-2));
+    background-image:
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.035) 0 2px, transparent 2px 22px),
+      linear-gradient(180deg,var(--navy),var(--navy-2));
+    color:#EDEFF5;
+    padding:18px 22px;
+    padding-top:calc(18px + env(safe-area-inset-top,0px));
+    display:flex; align-items:center; justify-content:space-between; gap:18px;
+    border-bottom:3px solid var(--red);
+    flex-wrap:wrap;
+  }
+  .mast-brand{display:flex; align-items:center; gap:12px;}
+  .mast-mark{font-size:22px; line-height:1;}
+  .mast-bank{font-weight:600; font-size:14px;}
+  .mast-unit{font-size:11px; color:#C7CCDA;}
+  .mast-title{text-align:center;}
+  .mast-title h1{font-family:'Fraunces',Georgia,serif; font-size:26px; font-weight:600; margin:0; letter-spacing:0.02em;}
+  .mast-title p{margin:2px 0 0; font-size:11px; color:#C7CCDA;}
+  .mast-status{display:flex; align-items:center; gap:9px;}
+  .status-dot{width:8px; height:8px; border-radius:50%; background:#4ADE80; box-shadow:0 0 0 3px rgba(74,222,128,0.25); flex-shrink:0;}
+  .mast-status-label{font-size:11px; font-weight:600;}
+  .mast-status-time{font-size:10px; color:#C7CCDA;}
+
+  /* ---- Shell ---- */
+  .shell{display:grid; grid-template-columns:210px 1fr; gap:20px; padding:20px; align-items:start;}
+  @media (max-width:900px){ .shell{grid-template-columns:1fr;} }
+
+  /* ---- Rail ---- */
+  .rail{background:var(--navy); border-radius:6px; overflow:hidden; box-shadow:var(--shadow);}
+  .rail-head{padding:12px 14px; font-size:10px; letter-spacing:0.06em; color:#9AA4BC; border-bottom:1px solid rgba(255,255,255,0.08);}
+  .nav-link{
+    display:flex; align-items:center; gap:10px; padding:11px 14px; font-size:13px; color:#CBD1E0;
+    cursor:pointer; border-left:3px solid transparent; transition:background 0.15s;
+  }
+  .nav-link i{width:16px; color:#7C8AAE;}
+  .nav-link:hover:not(.active){background:rgba(255,255,255,0.05);}
+  .nav-link.active{background:rgba(168,31,45,0.18); color:#fff; border-left-color:var(--red);}
+  .nav-link.active i{color:#F0A8A8;}
+
+  .info-panel{margin-top:16px; background:var(--panel); border:1px solid var(--hair-panel); border-radius:6px; padding:14px; box-shadow:var(--shadow);}
+  .info-panel h3{font-size:10px; letter-spacing:0.06em; color:var(--ink-faint); margin:0 0 10px; text-transform:uppercase; font-weight:700;}
+  .info-row{display:flex; justify-content:space-between; font-size:12px; color:var(--ink-soft); padding:6px 0; border-bottom:1px solid var(--hair-panel);}
+  .info-row:last-child{border-bottom:none;}
+  .info-row b{color:var(--ink); font-weight:600;}
+  .btn-reset{margin-top:12px; width:100%; background:var(--red-soft); color:var(--red); border:none; font-size:11px; padding:8px; border-radius:5px; cursor:pointer; font-weight:600;}
+  .btn-reset:hover{filter:brightness(0.96);}
+
+  /* ---- Panels (replaces generic card) ---- */
+  .panel{background:var(--panel); border:1px solid var(--hair-panel); border-radius:6px; box-shadow:var(--shadow);}
+  .panel-pad{padding:16px;}
+  .panel-title{font-size:11px; letter-spacing:0.03em; color:var(--ink-faint); font-weight:700; margin:0 0 10px; text-transform:uppercase;}
+  .panel-band{padding:10px 14px; font-size:11px; font-weight:700; letter-spacing:0.02em;}
+  .band-navy{background:var(--navy); color:#fff;}
+  .band-green{background:var(--green-soft); color:var(--green);}
+  .band-red{background:var(--red-soft); color:var(--red);}
+
+  /* ---- Statement bar (KPI row) ---- */
+  .stat-bar{display:grid; grid-template-columns:repeat(5,1fr); background:var(--panel); border:1px solid var(--hair-panel); border-radius:6px; box-shadow:var(--shadow); overflow:hidden;}
+  @media (max-width:900px){ .stat-bar{grid-template-columns:repeat(2,1fr);} }
+  .stat-cell{padding:16px 16px; border-right:1px solid var(--hair-panel); position:relative;}
+  .stat-cell::before{content:""; position:absolute; top:0; left:0; right:0; height:3px;}
+  .stat-cell:last-child{border-right:none;}
+  .stat-cell.c-navy::before{background:var(--navy);}
+  .stat-cell.c-green::before{background:var(--green);}
+  .stat-cell.c-red::before{background:var(--red);}
+  .stat-cell.c-navy2::before{background:var(--navy-2);}
+  .stat-cell.c-amber::before{background:var(--amber);}
+  .stat-label{font-size:10px; letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase; font-weight:700;}
+  .stat-value{font-size:26px; margin-top:6px;}
+  .stat-sub{font-size:10.5px; color:var(--ink-soft); margin-top:5px;}
+
+  /* ---- Tables ---- */
+  table{border-collapse:collapse; width:100%;}
+  thead.t-navy th{background:var(--navy); color:#fff; font-size:10.5px; font-weight:600; text-align:left; padding:9px 10px;}
+  thead.t-plain th{background:transparent; color:var(--ink-faint); font-size:10px; text-transform:uppercase; letter-spacing:0.03em; text-align:left; padding:8px 10px; border-bottom:1px solid var(--hair-panel);}
+  tbody td{padding:8px 10px; font-size:12px; border-bottom:1px solid var(--hair-panel); color:var(--ink);}
+  tbody tr:hover{background:rgba(15,34,68,0.03);}
+  tbody tr:last-child td{border-bottom:none;}
+
+  /* ---- Badges / status chips ---- */
+  .badge-green,.badge-yellow,.badge-red{padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700; display:inline-block;}
+  .badge-green{background:var(--green-soft); color:var(--green);}
+  .badge-yellow{background:var(--amber-soft); color:var(--amber);}
+  .badge-red{background:var(--red-soft); color:var(--red);}
+
+  .warn-chip{border:1px solid var(--red-soft); background:var(--red-soft); padding:9px; border-radius:6px; text-align:center;}
+  .warn-chip .u{font-weight:700; font-size:11.5px; color:var(--red);}
+  .warn-chip .p{font-size:10px; color:var(--ink-soft); margin-top:2px;}
+  .warn-chip .d{font-size:10px; font-weight:700; color:var(--red); margin-top:4px;}
+
+  /* ---- Forms ---- */
+  .field{border:1px solid var(--hair); background:var(--panel); border-radius:5px; padding:9px 10px; font-size:13px; color:var(--ink); width:100%;}
+  .field:focus{outline:2px solid var(--navy-2); outline-offset:1px;}
+  .field-label{font-size:11px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; display:block;}
+  .btn{border:none; border-radius:5px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer;}
+  .btn-primary{background:var(--navy); color:#fff;}
+  .btn-primary:hover{background:var(--navy-2);}
+  .btn-outline{background:transparent; border:1px solid var(--hair); color:var(--ink-soft);}
+  .btn-green{background:var(--green); color:#fff;}
+
+  /* ---- Footer ---- */
+  .strap{margin:0 20px 20px; background:var(--navy); color:#EDEFF5; padding:16px 20px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:11px;}
+  .strap .title{font-weight:700; font-size:13px;}
+  .strap .tag{color:#E7B8B0; font-style:italic; font-family:'Fraunces',serif; font-size:12px;}
+  .strap .meta{display:flex; gap:18px; color:#C7CCDA;}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+    <div class="mast-brand">
+        <span class="mast-mark">🏦</span>
+        <div>
+            <div class="mast-bank">Bank Jateng</div>
+            <div class="mast-unit">BangunKapasitas · Wilayah Jawa Tengah</div>
+        </div>
+    </div>
+    <div class="mast-title">
+        <h1>PULSE</h1>
+        <p>Satu dashboard, satu data, satu keputusan</p>
+    </div>
+    <div class="mast-status">
+        <span class="status-dot"></span>
+        <div>
+            <div class="mast-status-label">Live score evaluation</div>
+            <div class="mast-status-time">Monitoring aktif</div>
+        </div>
+    </div>
+</header>
+
+<div class="shell">
+
+<!-- RAIL -->
+<aside>
+    <nav class="rail">
+        <div class="rail-head">MENU UTAMA</div>
+        <div class="nav-link active" onclick="switchView('dashboard', this)"><i class="fa-solid fa-chart-line"></i> Dashboard monitoring</div>
+        <div class="nav-link" onclick="switchView('input', this)"><i class="fa-solid fa-pen-to-square"></i> Input pelaporan</div>
+        <div class="nav-link" onclick="switchView('masterUnit', this)"><i class="fa-solid fa-building"></i> Master unit kerja</div>
+        <div class="nav-link" onclick="switchView('masterProduk', this)"><i class="fa-solid fa-box"></i> Master produk</div>
+        <div class="nav-link" onclick="switchView('masterTarget', this)"><i class="fa-solid fa-bullseye"></i> Master target</div>
+        <div class="nav-link" onclick="switchView('laporan', this)"><i class="fa-solid fa-file-lines"></i> Laporan & export</div>
+    </nav>
+
+    <div class="info-panel">
+        <h3>Info sistem</h3>
+        <div class="info-row"><span>Total unit</span><b id="infoUnit">0</b></div>
+        <div class="info-row"><span>Total produk</span><b id="infoProduk">0</b></div>
+        <div class="info-row"><span>Periode tercatat</span><b id="infoPeriode">-</b></div>
+        <div class="info-row"><span>Terakhir diperbarui</span><b id="lastUpdate">-</b></div>
+        <button onclick="resetData()" class="btn-reset"><i class="fa-solid fa-rotate-left"></i> Reset semua data</button>
+    </div>
+</aside>
+
+<!-- KONTEN -->
+<main>
+
+<!-- ============ VIEW: DASHBOARD ============ -->
+<div id="view-dashboard" class="space-y-4">
+
+    <div class="panel panel-pad flex items-center gap-3">
+        <label class="text-xs font-semibold" style="color:var(--ink-soft)">Periode laporan</label>
+        <select id="filterPeriode" class="field" style="width:auto" onchange="renderDashboard()"></select>
+    </div>
+
+    <div class="stat-bar">
+        <div class="stat-cell c-navy">
+            <div class="stat-label">Total target</div>
+            <div class="stat-value num" id="dash-target">0 M</div>
+            <div class="stat-sub" id="dash-target-info">-</div>
+        </div>
+        <div class="stat-cell c-green">
+            <div class="stat-label">Total realisasi</div>
+            <div class="stat-value num" id="dash-realisasi">0 M</div>
+            <div class="stat-sub" id="dash-realisasi-pct">-</div>
+        </div>
+        <div class="stat-cell c-red">
+            <div class="stat-label">Persentase capaian</div>
+            <div class="stat-value num" id="dash-capaian">0%</div>
+            <div class="stat-sub">Keseluruhan</div>
+        </div>
+        <div class="stat-cell c-navy2">
+            <div class="stat-label">Jumlah unit</div>
+            <div class="stat-value num" id="dash-unit">0</div>
+            <div class="stat-sub">Unit aktif</div>
+        </div>
+        <div class="stat-cell c-amber">
+            <div class="stat-label">Perlu perhatian</div>
+            <div class="stat-value num" id="dash-warning">0</div>
+            <div class="stat-sub">Early warning</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="panel panel-pad">
+            <h3 class="panel-title">Capaian per produk</h3>
+            <div class="h-48"><canvas id="kpiChart"></canvas></div>
+        </div>
+        <div class="panel panel-pad">
+            <h3 class="panel-title">Distribusi capaian unit</h3>
+            <div class="h-48 flex justify-center"><canvas id="distChart"></canvas></div>
+        </div>
+        <div class="panel panel-pad">
+            <h3 class="panel-title">Ringkasan capaian</h3>
+            <div class="space-y-1" id="ringkasan-box"></div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="panel" style="overflow:hidden;">
+            <div class="panel-band band-green">🏆 Top 5 unit terbaik</div>
+            <table>
+                <thead class="t-plain"><tr><th>No</th><th>Unit</th><th>Capaian</th><th>Score</th></tr></thead>
+                <tbody id="top5Table"></tbody>
+            </table>
+        </div>
+        <div class="panel" style="overflow:hidden;">
+            <div class="panel-band band-red">⚠ Bottom 5 unit</div>
+            <table>
+                <thead class="t-plain"><tr><th>No</th><th>Unit</th><th>Capaian</th><th>Score</th></tr></thead>
+                <tbody id="bottom5Table"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel panel-pad">
+        <h3 class="panel-title" style="color:var(--red)"><i class="fa-solid fa-triangle-exclamation"></i> Early warning monitor</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2" id="warningContainer"></div>
+    </div>
+
+    <div class="panel" style="overflow:hidden;">
+        <div class="panel-band band-navy">Detail capaian seluruh unit</div>
+        <table>
+            <thead class="t-navy">
+                <tr><th>Unit</th><th>Target</th><th>Realisasi</th><th>Capaian</th><th>Score</th><th>Status</th></tr>
+            </thead>
+            <tbody id="detailUnitTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============ VIEW: INPUT PELAPORAN ============ -->
+<div id="view-input" class="hidden space-y-4">
+    <div class="panel panel-pad">
+        <h2 class="num" style="font-size:19px; margin:0 0 2px;">Input pelaporan realisasi</h2>
+        <p class="text-xs mb-4" style="color:var(--ink-faint)">Input realisasi per produk per unit kerja untuk periode tertentu.</p>
+
+        <form id="formLaporan" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="field-label">Unit kerja</label>
+                <select id="lapUnit" class="field" required></select>
+            </div>
+            <div>
+                <label class="field-label">Periode</label>
+                <input type="month" id="lapPeriode" class="field" required>
+            </div>
+            <div>
+                <label class="field-label">Petugas input</label>
+                <input type="text" id="lapPetugas" class="field" placeholder="Nama operator" required>
+            </div>
+
+            <div class="md:col-span-3" style="border-top:1px solid var(--hair-panel); padding-top:14px;">
+                <h3 class="panel-title" style="color:var(--navy)">Realisasi per produk (dalam juta rupiah)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="inputProdukContainer"></div>
+            </div>
+
+            <div class="md:col-span-3 flex gap-2 mt-2">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan laporan</button>
+                <button type="reset" class="btn btn-outline">Reset</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="panel" style="overflow:hidden;">
+        <div class="panel-band band-navy flex justify-between">
+            <span>Riwayat pelaporan</span>
+            <span id="lapCount" style="font-weight:400; color:#C7CCDA;">0 data</span>
+        </div>
+        <div class="max-h-96 overflow-y-auto">
+            <table>
+                <thead class="t-plain" style="position:sticky; top:0; background:var(--panel);">
+                    <tr><th>Tgl input</th><th>Unit</th><th>Periode</th><th>Petugas</th><th>Total realisasi</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="lapHistory"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ============ VIEW: MASTER UNIT ============ -->
+<div id="view-masterUnit" class="hidden space-y-4">
+    <div class="panel panel-pad">
+        <h2 class="num" style="font-size:19px; margin:0 0 14px;">Master unit kerja</h2>
+        <form id="formUnit" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+            <input type="text" id="unitKode" placeholder="Kode unit (ex: KF001)" class="field" required>
+            <input type="text" id="unitNama" placeholder="Nama unit" class="field" required>
+            <select id="unitWilayah" class="field" required>
+                <option value="">Pilih wilayah</option>
+                <option>Semarang</option><option>Solo</option><option>Purwokerto</option><option>Kudus</option><option>Magelang</option>
+            </select>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tambah unit</button>
+        </form>
+
+        <table>
+            <thead class="t-navy"><tr><th>Kode</th><th>Nama unit</th><th>Wilayah</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="unitTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============ VIEW: MASTER PRODUK ============ -->
+<div id="view-masterProduk" class="hidden space-y-4">
+    <div class="panel panel-pad">
+        <h2 class="num" style="font-size:19px; margin:0 0 14px;">Master produk</h2>
+        <form id="formProduk" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+            <input type="text" id="produkKode" placeholder="Kode produk (ex: GR)" class="field" required>
+            <input type="text" id="produkNama" placeholder="Nama produk" class="field" required>
+            <input type="number" id="produkBobot" placeholder="Bobot (%)" class="field" required>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tambah produk</button>
+        </form>
+
+        <table>
+            <thead class="t-navy"><tr><th>Kode</th><th>Nama produk</th><th>Bobot</th><th>Aksi</th></tr></thead>
+            <tbody id="produkTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============ VIEW: MASTER TARGET ============ -->
+<div id="view-masterTarget" class="hidden space-y-4">
+    <div class="panel panel-pad">
+        <h2 class="num" style="font-size:19px; margin:0 0 2px;">Master target kinerja</h2>
+        <p class="text-xs mb-4" style="color:var(--ink-faint)">Setting target per unit per produk. Target dalam juta rupiah.</p>
+
+        <div class="flex gap-2 mb-4">
+            <select id="targetPeriode" class="field" style="width:auto"></select>
+            <button onclick="loadTargetForm()" class="btn btn-primary">Tampilkan form target</button>
+        </div>
+
+        <div id="targetFormContainer" class="overflow-x-auto"></div>
+    </div>
+</div>
+
+<!-- ============ VIEW: LAPORAN ============ -->
+<div id="view-laporan" class="hidden space-y-4">
+    <div class="panel panel-pad">
+        <h2 class="num" style="font-size:19px; margin:0 0 14px;">Laporan & export</h2>
+
+        <div class="flex gap-2 mb-4">
+            <select id="lapReportPeriode" class="field" style="width:auto"></select>
+            <button onclick="generateReport()" class="btn btn-primary">Tampilkan laporan</button>
+            <button onclick="exportCSV()" class="btn btn-green"><i class="fa-solid fa-download"></i> Export CSV</button>
+        </div>
+
+        <div id="reportContainer" class="overflow-x-auto"></div>
+    </div>
+</div>
+
+</main>
+</div>
+
+<footer class="strap">
+    <div class="flex items-center gap-3">
+        <i class="fa-solid fa-bullseye" style="color:var(--red); font-size:22px;"></i>
+        <div>
+            <div class="title">PULSE — Monitoring kinerja unit kerja real-time</div>
+            <div class="tag">"Data berkualitas, keputusan berkualitas, kinerja optimal"</div>
+        </div>
+    </div>
+    <div class="meta">
+        <div><i class="fa-regular fa-clock"></i> Real-time</div>
+        <div><i class="fa-solid fa-check-double"></i> Accurate</div>
+        <div><i class="fa-solid fa-link"></i> Integrated</div>
+    </div>
+</footer>
+
+<script>
+// =====================================================
+// DATABASE SIMULASI (localStorage)
+// =====================================================
+const DB_KEY = 'pulseDB_v3';
+
+const defaultDB = {
+    masterUnit: [
+        { kode: 'KF001', nama: 'KF RSU', wilayah: 'Semarang', status: 'Aktif' },
+        { kode: 'KF002', nama: 'KF Pemda', wilayah: 'Semarang', status: 'Aktif' },
+        { kode: 'KF003', nama: 'KF Andong', wilayah: 'Solo', status: 'Aktif' },
+        { kode: 'KF004', nama: 'KF Pengging', wilayah: 'Solo', status: 'Aktif' },
+        { kode: 'KF005', nama: 'KF Ampel', wilayah: 'Magelang', status: 'Aktif' },
+        { kode: 'KF006', nama: 'KF Ngemplak', wilayah: 'Solo', status: 'Aktif' },
+        { kode: 'MKK001', nama: 'MKK', wilayah: 'Semarang', status: 'Aktif' }
+    ],
+    masterProduk: [
+        { kode: 'GR', nama: 'Giro', bobot: 30 },
+        { kode: 'TB', nama: 'Tabungan', bobot: 30 },
+        { kode: 'DP', nama: 'Deposito', bobot: 25 },
+        { kode: 'DK', nama: 'DPLK', bobot: 15 }
+    ],
+    masterTarget: [
+        { periode: '2024-05', unitKode: 'KF001', target: { GR: 40000, TB: 60000, DP: 45000, DK: 25000 } },
+        { periode: '2024-05', unitKode: 'KF002', target: { GR: 35000, TB: 55000, DP: 40000, DK: 22000 } },
+        { periode: '2024-05', unitKode: 'KF003', target: { GR: 30000, TB: 50000, DP: 35000, DK: 20000 } },
+        { periode: '2024-05', unitKode: 'KF004', target: { GR: 28000, TB: 48000, DP: 33000, DK: 18000 } },
+        { periode: '2024-05', unitKode: 'KF005', target: { GR: 25000, TB: 45000, DP: 30000, DK: 16000 } },
+        { periode: '2024-05', unitKode: 'KF006', target: { GR: 20000, TB: 35000, DP: 25000, DK: 12000 } },
+        { periode: '2024-05', unitKode: 'MKK001', target: { GR: 18000, TB: 32000, DP: 22000, DK: 10000 } }
+    ],
+    pelaporan: [
+        { id: 1, tgl: '2024-05-20', periode: '2024-05', unitKode: 'KF001', petugas: 'Budi', realisasi: { GR: 46080, TB: 56520, DP: 37395, DK: 19200 } },
+        { id: 2, tgl: '2024-05-20', periode: '2024-05', unitKode: 'KF002', petugas: 'Siti', realisasi: { GR: 39218, TB: 61600, DP: 33280, DK: 16940 } },
+        { id: 3, tgl: '2024-05-20', periode: '2024-05', unitKode: 'KF003', petugas: 'Agus', realisasi: { GR: 32670, TB: 54450, DP: 28630, DK: 15400 } },
+        { id: 4, tgl: '2024-05-20', periode: '2024-05', unitKode: 'KF004', petugas: 'Dewi', realisasi: { GR: 29568, TB: 50688, DP: 26664, DK: 13860 } },
+        { id: 5, tgl: '2024-05-20', periode: '2024-05', unitKode: 'KF005', petugas: 'Rudi', realisasi: { GR: 25800, TB: 45900, DP: 28800, DK: 12320 } },
+        { id: 6, tgl: '2024-05-20', periode: '2024-05', unitKode: 'KF006', petugas: 'Ani', realisasi: { GR: 14200, TB: 25200, DP: 18750, DK: 8640 } },
+        { id: 7, tgl: '2024-05-20', periode: '2024-05', unitKode: 'MKK001', petugas: 'Tono', realisasi: { GR: 12300, TB: 22900, DP: 15400, DK: 7000 } }
+    ]
+};
+
+function loadDB() {
+    try {
+        const raw = localStorage.getItem(DB_KEY);
+        return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(defaultDB));
+    } catch (e) {
+        console.error('Storage read failed, using defaults', e);
+        return JSON.parse(JSON.stringify(defaultDB));
+    }
+}
+
+let DB = loadDB();
+
+function saveDB() {
+    try {
+        localStorage.setItem(DB_KEY, JSON.stringify(DB));
+    } catch (e) {
+        console.error('Storage write failed', e);
+    }
+    document.getElementById('lastUpdate').innerText = new Date().toLocaleString('id-ID');
+    updateInfoSistem();
+}
+
+function resetData() {
+    if(confirm('⚠️ Yakin reset SEMUA data ke default? Data input akan hilang.')) {
+        DB = JSON.parse(JSON.stringify(defaultDB));
+        saveDB();
+        renderAll();
+    }
+}
+
+function updateInfoSistem() {
+    document.getElementById('infoUnit').innerText = DB.masterUnit.length;
+    document.getElementById('infoProduk').innerText = DB.masterProduk.length;
+    document.getElementById('infoPeriode').innerText = getPeriodeList().length + ' periode';
+}
+
+// =====================================================
+// UTILITIES
+// =====================================================
+function getPeriodeList() {
+    const periode = new Set(DB.masterTarget.map(t => t.periode));
+    return Array.from(periode).sort();
+}
+
+function getUnitName(kode) {
+    const u = DB.masterUnit.find(x => x.kode === kode);
+    return u ? u.nama : kode;
+}
+
+function formatJuta(val) {
+    if (val >= 1000) return (val / 1000).toFixed(2) + ' M';
+    return val.toFixed(0) + ' Jt';
+}
+
+function getKategori(pct) {
+    if (pct > 100) return { label: 'Hijau', cls: 'badge-green' };
+    if (pct >= 80) return { label: 'Kuning', cls: 'badge-yellow' };
+    return { label: 'Merah', cls: 'badge-red' };
+}
+
+// =====================================================
+// NAVIGASI
+// =====================================================
+function switchView(view, el) {
+    document.querySelectorAll('main > div').forEach(d => d.classList.add('hidden'));
+    document.getElementById('view-' + view).classList.remove('hidden');
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    if(el) el.classList.add('active');
+
+    if(view === 'dashboard') renderDashboard();
+    if(view === 'input') renderInputView();
+    if(view === 'masterUnit') renderMasterUnit();
+    if(view === 'masterProduk') renderMasterProduk();
+    if(view === 'masterTarget') renderMasterTarget();
+    if(view === 'laporan') renderLaporanView();
+}
+
+// =====================================================
+// LOGIKA PERHITUNGAN INTI
+// =====================================================
+function hitungCapaianUnit(unitKode, periode) {
+    const targetEntry = DB.masterTarget.find(t => t.unitKode === unitKode && t.periode === periode);
+    if (!targetEntry) return null;
+
+    const lap = DB.pelaporan.filter(p => p.unitKode === unitKode && p.periode === periode);
+    if (lap.length === 0) return null;
+    const lastLap = lap[lap.length - 1];
+
+    const produkMap = {};
+    let totalTarget = 0, totalRealisasi = 0;
+    let totalBobot = 0;
+    let weightedScore = 0;
+
+    DB.masterProduk.forEach(prod => {
+        const tgt = targetEntry.target[prod.kode] || 0;
+        const real = lastLap.realisasi[prod.kode] || 0;
+        const pct = tgt > 0 ? (real / tgt) * 100 : 0;
+
+        produkMap[prod.kode] = { target: tgt, realisasi: real, pct, bobot: prod.bobot };
+
+        totalTarget += tgt;
+        totalRealisasi += real;
+        weightedScore += (pct * prod.bobot) / 100;
+        totalBobot += prod.bobot;
+    });
+
+    const pctTotal = totalTarget > 0 ? (totalRealisasi / totalTarget) * 100 : 0;
+
+    return {
+        unitKode,
+        unitNama: getUnitName(unitKode),
+        totalTarget,
+        totalRealisasi,
+        pctTotal,
+        kpiScore: weightedScore,
+        produk: produkMap,
+        kategori: getKategori(pctTotal)
+    };
+}
+
+// =====================================================
+// RENDER DASHBOARD
+// =====================================================
+let chartKpi = null, chartDist = null;
+
+if (window.Chart) {
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#5B6478';
+}
+
+function renderDashboard() {
+    const periode = document.getElementById('filterPeriode').value || getPeriodeList()[0];
+    if(!periode) return;
+
+    const hasil = DB.masterUnit
+        .filter(u => u.status === 'Aktif')
+        .map(u => hitungCapaianUnit(u.kode, periode))
+        .filter(x => x !== null);
+
+    let grandTarget = 0, grandRealisasi = 0;
+    let hijau = 0, kuning = 0, merah = 0;
+
+    hasil.forEach(h => {
+        grandTarget += h.totalTarget;
+        grandRealisasi += h.totalRealisasi;
+        if (h.pctTotal > 100) hijau++;
+        else if (h.pctTotal >= 80) kuning++;
+        else merah++;
+    });
+
+    const grandPct = grandTarget > 0 ? (grandRealisasi / grandTarget) * 100 : 0;
+
+    document.getElementById('dash-target').innerText = formatJuta(grandTarget);
+    document.getElementById('dash-target-info').innerText = DB.masterUnit.length + ' unit aktif';
+    document.getElementById('dash-realisasi').innerText = formatJuta(grandRealisasi);
+    document.getElementById('dash-realisasi-pct').innerText = grandPct.toFixed(2) + '% dari target';
+    document.getElementById('dash-capaian').innerText = grandPct.toFixed(2) + '%';
+    document.getElementById('dash-unit').innerText = hasil.length;
+    document.getElementById('dash-warning').innerText = merah;
+
+    document.getElementById('ringkasan-box').innerHTML = `
+        <div class="flex justify-between text-xs py-1" style="border-bottom:1px solid var(--hair-panel)"><span>Rata-rata capaian</span><b class="num" style="color:var(--navy)">${grandPct.toFixed(2)}%</b></div>
+        <div class="flex justify-between text-xs py-1" style="border-bottom:1px solid var(--hair-panel)"><span><span class="badge-green">Hijau</span> &gt;100%</span><b>${hijau} unit</b></div>
+        <div class="flex justify-between text-xs py-1" style="border-bottom:1px solid var(--hair-panel)"><span><span class="badge-yellow">Kuning</span> 80–100%</span><b>${kuning} unit</b></div>
+        <div class="flex justify-between text-xs py-1"><span><span class="badge-red">Merah</span> &lt;80%</span><b>${merah} unit</b></div>
+    `;
+
+    renderCharts(hasil, hijau, kuning, merah);
+
+    const sorted = [...hasil].sort((a,b) => b.kpiScore - a.kpiScore);
+    const top5 = sorted.slice(0, 5);
+    const bottom5 = sorted.slice(-5).reverse();
+
+    document.getElementById('top5Table').innerHTML = top5.map((h,i) => `
+        <tr>
+            <td>${i+1}</td>
+            <td style="font-weight:600">${h.unitNama}</td>
+            <td class="num" style="color:var(--green); font-weight:600">${h.pctTotal.toFixed(2)}%</td>
+            <td class="num">${h.kpiScore.toFixed(2)}</td>
+        </tr>
+    `).join('');
+
+    document.getElementById('bottom5Table').innerHTML = bottom5.map((h,i) => `
+        <tr>
+            <td>${i+1}</td>
+            <td style="font-weight:600">${h.unitNama}</td>
+            <td class="num" style="color:var(--red); font-weight:600">${h.pctTotal.toFixed(2)}%</td>
+            <td class="num">${h.kpiScore.toFixed(2)}</td>
+        </tr>
+    `).join('');
+
+    const warning = hasil.filter(h => h.pctTotal < 80);
+    const wc = document.getElementById('warningContainer');
+    if (warning.length === 0) {
+        wc.innerHTML = '<div class="col-span-6 text-center text-sm py-4" style="color:var(--ink-faint)">✅ Semua unit di atas 80%</div>';
+    } else {
+        wc.innerHTML = warning.map(h => {
+            let minProd = '', minPct = 999;
+            Object.entries(h.produk).forEach(([k,v]) => {
+                if(v.pct < minPct) { minPct = v.pct; minProd = DB.masterProduk.find(p=>p.kode===k).nama; }
+            });
+            return `
+                <div class="warn-chip">
+                    <div class="u">${h.unitNama}</div>
+                    <div class="p">Capaian ${h.pctTotal.toFixed(2)}%</div>
+                    <div class="d">${minProd} ↓</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    document.getElementById('detailUnitTable').innerHTML = sorted.map(h => `
+        <tr>
+            <td style="font-weight:600">${h.unitNama}</td>
+            <td class="num">${formatJuta(h.totalTarget)}</td>
+            <td class="num">${formatJuta(h.totalRealisasi)}</td>
+            <td class="num" style="font-weight:700">${h.pctTotal.toFixed(2)}%</td>
+            <td class="num">${h.kpiScore.toFixed(2)}</td>
+            <td><span class="${h.kategori.cls}">${h.kategori.label}</span></td>
+        </tr>
+    `).join('');
+}
+
+function renderCharts(hasil, hijau, kuning, merah) {
+    if(chartKpi) chartKpi.destroy();
+    if(chartDist) chartDist.destroy();
+
+    const produkAgg = {};
+    DB.masterProduk.forEach(p => produkAgg[p.kode] = { target: 0, realisasi: 0, nama: p.nama });
+
+    hasil.forEach(h => {
+        DB.masterProduk.forEach(p => {
+            produkAgg[p.kode].target += h.produk[p.kode].target;
+            produkAgg[p.kode].realisasi += h.produk[p.kode].realisasi;
+        });
+    });
+
+    const labels = Object.values(produkAgg).map(x => x.nama);
+    const dataPct = Object.values(produkAgg).map(x => x.target > 0 ? (x.realisasi/x.target)*100 : 0);
+    const colors = dataPct.map(p => p > 100 ? '#1F7A54' : p >= 80 ? '#96690D' : '#A81F2D');
+
+    chartKpi = new Chart(document.getElementById('kpiChart'), {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Capaian (%)', data: dataPct, backgroundColor: colors, borderRadius: 3 }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, max: 120, grid: { color: '#E7E3D9' } }, y: { grid: { display: false } } } }
+    });
+
+    chartDist = new Chart(document.getElementById('distChart'), {
+        type: 'doughnut',
+        data: { labels: [`>100% (${hijau})`, `80-100% (${kuning})`, `<80% (${merah})`],
+            datasets: [{ data: [hijau, kuning, merah], backgroundColor: ['#1F7A54','#96690D','#A81F2D'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } }, cutout: '65%' }
+    });
+}
+
+// =====================================================
+// RENDER INPUT VIEW
+// =====================================================
+function renderInputView() {
+    const selUnit = document.getElementById('lapUnit');
+    selUnit.innerHTML = '<option value="">-- Pilih Unit --</option>' +
+        DB.masterUnit.filter(u=>u.status==='Aktif').map(u => `<option value="${u.kode}">${u.nama}</option>`).join('');
+
+    if(!document.getElementById('lapPeriode').value) {
+        document.getElementById('lapPeriode').value = getPeriodeList()[0] || '2024-05';
+    }
+
+    document.getElementById('inputProdukContainer').innerHTML = DB.masterProduk.map(p => `
+        <div>
+            <label class="field-label">${p.nama}</label>
+            <input type="number" id="inp_${p.kode}" step="0.01" class="field" placeholder="0.00" required>
+        </div>
+    `).join('');
+
+    renderHistory();
+}
+
+function renderHistory() {
+    const tbody = document.getElementById('lapHistory');
+    const sorted = [...DB.pelaporan].sort((a,b) => b.id - a.id);
+    document.getElementById('lapCount').innerText = sorted.length + ' data';
+
+    tbody.innerHTML = sorted.map(p => {
+        const total = Object.values(p.realisasi).reduce((a,b)=>a+b,0);
+        return `
+            <tr>
+                <td>${p.tgl}</td>
+                <td style="font-weight:600">${getUnitName(p.unitKode)}</td>
+                <td>${p.periode}</td>
+                <td>${p.petugas}</td>
+                <td class="num" style="font-weight:700">${formatJuta(total)}</td>
+                <td>
+                    <button onclick="hapusLaporan(${p.id})" style="color:var(--red)">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function hapusLaporan(id) {
+    if(!confirm('Hapus laporan ini?')) return;
+    DB.pelaporan = DB.pelaporan.filter(p => p.id !== id);
+    saveDB();
+    renderHistory();
+}
+
+document.getElementById('formLaporan').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const unitKode = document.getElementById('lapUnit').value;
+    const periode = document.getElementById('lapPeriode').value;
+    const petugas = document.getElementById('lapPetugas').value;
+
+    if(!unitKode || !periode) { alert('Lengkapi data!'); return; }
+
+    const adaTarget = DB.masterTarget.find(t => t.unitKode === unitKode && t.periode === periode);
+    if(!adaTarget) {
+        if(!confirm(`⚠️ Target untuk unit ${getUnitName(unitKode)} periode ${periode} belum diset. Tetap lanjutkan input?`)) return;
+    }
+
+    const realisasi = {};
+    DB.masterProduk.forEach(p => {
+        realisasi[p.kode] = parseFloat(document.getElementById('inp_' + p.kode).value) || 0;
+    });
+
+    const newId = DB.pelaporan.length > 0 ? Math.max(...DB.pelaporan.map(p=>p.id)) + 1 : 1;
+    DB.pelaporan.push({
+        id: newId,
+        tgl: new Date().toISOString().slice(0,10),
+        periode,
+        unitKode,
+        petugas,
+        realisasi
+    });
+
+    saveDB();
+    this.reset();
+    renderInputView();
+    alert('✅ Laporan berhasil disimpan!');
+});
+
+// =====================================================
+// RENDER MASTER UNIT
+// =====================================================
+function renderMasterUnit() {
+    document.getElementById('unitTable').innerHTML = DB.masterUnit.map(u => `
+        <tr>
+            <td style="font-family:'Inter',monospace">${u.kode}</td>
+            <td style="font-weight:600">${u.nama}</td>
+            <td>${u.wilayah}</td>
+            <td><span class="${u.status==='Aktif'?'badge-green':'badge-red'}">${u.status}</span></td>
+            <td>
+                <button onclick="toggleUnit('${u.kode}')" style="color:var(--navy-2)" class="mr-2" title="Toggle Status">
+                    <i class="fa-solid fa-toggle-on"></i>
+                </button>
+                <button onclick="hapusUnit('${u.kode}')" style="color:var(--red)" title="Hapus">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+document.getElementById('formUnit').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const kode = document.getElementById('unitKode').value.trim();
+    const nama = document.getElementById('unitNama').value.trim();
+    const wilayah = document.getElementById('unitWilayah').value;
+    if(DB.masterUnit.find(u => u.kode === kode)) { alert('Kode sudah ada!'); return; }
+    DB.masterUnit.push({ kode, nama, wilayah, status: 'Aktif' });
+    saveDB();
+    this.reset();
+    renderMasterUnit();
+});
+
+function toggleUnit(kode) {
+    const u = DB.masterUnit.find(x => x.kode === kode);
+    if(u) { u.status = u.status === 'Aktif' ? 'Nonaktif' : 'Aktif'; saveDB(); renderMasterUnit(); }
+}
+
+function hapusUnit(kode) {
+    if(!confirm('Hapus unit ini? Semua data terkait akan ikut terhapus.')) return;
+    DB.masterUnit = DB.masterUnit.filter(u => u.kode !== kode);
+    DB.masterTarget = DB.masterTarget.filter(t => t.unitKode !== kode);
+    DB.pelaporan = DB.pelaporan.filter(p => p.unitKode !== kode);
+    saveDB();
+    renderMasterUnit();
+}
+
+// =====================================================
+// RENDER MASTER PRODUK
+// =====================================================
+function renderMasterProduk() {
+    document.getElementById('produkTable').innerHTML = DB.masterProduk.map(p => `
+        <tr>
+            <td style="font-family:'Inter',monospace">${p.kode}</td>
+            <td style="font-weight:600">${p.nama}</td>
+            <td class="num">${p.bobot}%</td>
+            <td><button onclick="hapusProduk('${p.kode}')" style="color:var(--red)"><i class="fa-solid fa-trash"></i></button></td>
+        </tr>
+    `).join('');
+}
+
+document.getElementById('formProduk').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const kode = document.getElementById('produkKode').value.trim().toUpperCase();
+    const nama = document.getElementById('produkNama').value.trim();
+    const bobot = parseFloat(document.getElementById('produkBobot').value);
+    if(DB.masterProduk.find(p => p.kode === kode)) { alert('Kode produk sudah ada!'); return; }
+    DB.masterProduk.push({ kode, nama, bobot });
+    saveDB();
+    this.reset();
+    renderMasterProduk();
+});
+
+function hapusProduk(kode) {
+    if(!confirm('Hapus produk ini?')) return;
+    DB.masterProduk = DB.masterProduk.filter(p => p.kode !== kode);
+    saveDB();
+    renderMasterProduk();
+}
+
+// =====================================================
+// RENDER MASTER TARGET
+// =====================================================
+function renderMasterTarget() {
+    const sel = document.getElementById('targetPeriode');
+    sel.innerHTML = getPeriodeList().map(p => `<option value="${p}">${p}</option>`).join('');
+}
+
+function loadTargetForm() {
+    const periode = document.getElementById('targetPeriode').value;
+    const container = document.getElementById('targetFormContainer');
+
+    if(!periode) { container.innerHTML = '<p class="text-sm" style="color:var(--ink-faint)">Belum ada periode.</p>'; return; }
+
+    let html = `<table>
+        <thead class="t-navy">
+            <tr>
+                <th>Unit Kerja</th>
+                ${DB.masterProduk.map(p => `<th>${p.nama} (Jt)</th>`).join('')}
+                <th>Total Target</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    DB.masterUnit.filter(u => u.status === 'Aktif').forEach(u => {
+        const existing = DB.masterTarget.find(t => t.unitKode === u.kode && t.periode === periode);
+        const target = existing ? existing.target : {};
+        const totalTgt = DB.masterProduk.reduce((s,p) => s + (target[p.kode] || 0), 0);
+
+        html += `<tr>
+            <td style="font-weight:600">${u.nama}</td>
+            ${DB.masterProduk.map(p => `
+                <td>
+                    <input type="number" class="field tgt_${u.kode}_${p.kode}" style="width:100px; padding:5px 7px; font-size:12px;"
+                        value="${target[p.kode] || 0}" step="1000">
+                </td>
+            `).join('')}
+            <td class="num" style="font-weight:700; color:var(--navy)">${totalTgt.toLocaleString()}</td>
+        </tr>`;
+    });
+
+    html += `</tbody></table>
+        <button onclick="simpanTarget('${periode}')" class="btn btn-primary mt-4">
+            <i class="fa-solid fa-save"></i> Simpan Target
+        </button>`;
+
+    container.innerHTML = html;
+}
+
+function simpanTarget(periode) {
+    DB.masterUnit.filter(u => u.status === 'Aktif').forEach(u => {
+        const target = {};
+        DB.masterProduk.forEach(p => {
+            const input = document.querySelector(`.tgt_${u.kode}_${p.kode}`);
+            target[p.kode] = parseFloat(input.value) || 0;
+        });
+
+        const idx = DB.masterTarget.findIndex(t => t.unitKode === u.kode && t.periode === periode);
+        if (idx !== -1) DB.masterTarget[idx].target = target;
+        else DB.masterTarget.push({ periode, unitKode: u.kode, target });
+    });
+    saveDB();
+    alert('✅ Target berhasil disimpan!');
+    loadTargetForm();
+}
+
+// =====================================================
+// RENDER LAPORAN
+// =====================================================
+function renderLaporanView() {
+    const sel = document.getElementById('lapReportPeriode');
+    sel.innerHTML = getPeriodeList().map(p => `<option value="${p}">${p}</option>`).join('');
+}
+
+let reportData = [];
+
+function generateReport() {
+    const periode = document.getElementById('lapReportPeriode').value;
+    const hasil = DB.masterUnit
+        .filter(u => u.status === 'Aktif')
+        .map(u => hitungCapaianUnit(u.kode, periode))
+        .filter(x => x !== null)
+        .sort((a,b) => b.kpiScore - a.kpiScore);
+
+    reportData = hasil;
+
+    let html = `<table>
+        <thead class="t-navy">
+            <tr>
+                <th>No</th><th>Unit</th><th>Target</th><th>Realisasi</th><th>Capaian</th><th>KPI Score</th><th>Status</th>
+                ${DB.masterProduk.map(p => `<th>${p.nama}</th>`).join('')}
+            </tr>
+        </thead>
+        <tbody>`;
+
+    hasil.forEach((h, i) => {
+        html += `<tr style="${i<3?'background:var(--green-soft)':''}">
+            <td>${i+1}</td>
+            <td style="font-weight:600">${h.unitNama}</td>
+            <td class="num">${formatJuta(h.totalTarget)}</td>
+            <td class="num">${formatJuta(h.totalRealisasi)}</td>
+            <td class="num" style="font-weight:700">${h.pctTotal.toFixed(2)}%</td>
+            <td class="num">${h.kpiScore.toFixed(2)}</td>
+            <td><span class="${h.kategori.cls}">${h.kategori.label}</span></td>
+            ${DB.masterProduk.map(p => `<td class="num">${h.produk[p.kode].pct.toFixed(1)}%</td>`).join('')}
+        </tr>`;
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('reportContainer').innerHTML = html;
+}
+
+function exportCSV() {
+    if (reportData.length === 0) { alert('Generate laporan dulu!'); return; }
+
+    let csv = 'No,Unit,Target,Realisasi,Capaian,KPI Score,Status\n';
+    reportData.forEach((h, i) => {
+        csv += `${i+1},${h.unitNama},${h.totalTarget},${h.totalRealisasi},${h.pctTotal.toFixed(2)}%,${h.kpiScore.toFixed(2)},${h.kategori.label}\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `laporan_pulse_${document.getElementById('lapReportPeriode').value}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// =====================================================
+// INIT
+// =====================================================
+function renderAll() {
+    const selFilter = document.getElementById('filterPeriode');
+    selFilter.innerHTML = getPeriodeList().map(p => `<option value="${p}">${p}</option>`).join('');
+
+    renderDashboard();
+    renderInputView();
+    renderMasterUnit();
+    renderMasterProduk();
+    renderMasterTarget();
+    renderLaporanView();
+    updateInfoSistem();
+}
+
+renderAll();
+</script>
+</body>
+</html>
